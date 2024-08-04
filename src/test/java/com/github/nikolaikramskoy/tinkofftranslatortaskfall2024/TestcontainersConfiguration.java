@@ -1,4 +1,4 @@
-package com.github.nikolaikramskoy.tinkoff_translator_task_fall_2024;
+package com.github.nikolaikramskoy.tinkofftranslatortaskfall2024;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -9,10 +9,9 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 class TestcontainersConfiguration {
 
-	@Bean
-	@ServiceConnection
-	PostgreSQLContainer<?> postgresContainer() {
-		return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
-	}
-
+  @Bean
+  @ServiceConnection
+  PostgreSQLContainer<?> postgresContainer() {
+    return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+  }
 }
