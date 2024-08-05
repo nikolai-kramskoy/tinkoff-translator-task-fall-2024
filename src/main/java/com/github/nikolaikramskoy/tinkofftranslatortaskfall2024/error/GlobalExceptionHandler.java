@@ -8,7 +8,6 @@ import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -29,6 +28,16 @@ public class GlobalExceptionHandler {
                     .map(ConstraintViolation::getMessage)
                     .map(ErrorDto::new)
                     .toList()));
+  }
+
+  @ExceptionHandler(ApplicationException.class)
+  public ResponseEntity<ErrorDtoResponse> handleApplicationException(final ApplicationException e) {
+    log.info("ApplicationException", e);
+
+    // or maybe 4xx is better...
+    return ResponseEntity.internalServerError()
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(new ErrorDtoResponse(Collections.singletonList(new ErrorDto(e.getMessage()))));
   }
 
   @ExceptionHandler(YandexApiException.class)
