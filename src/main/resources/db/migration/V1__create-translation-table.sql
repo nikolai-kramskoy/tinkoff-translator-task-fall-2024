@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS translation (
-    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id uuid PRIMARY KEY,
     client_ip inet NOT NULL,
     "timestamp" TIMESTAMP NOT NULL,
     source_language TEXT NOT NULL,

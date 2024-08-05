@@ -19,6 +19,18 @@ public class TranslationRepository {
   private JdbcClient jdbcClient;
 
   public int saveTranslation(final Translation translation) {
-    return jdbcClient.sql(SAVE_TRANSLATION_QUERY).paramSource(translation).update();
+    // this is an interesting solution
+    // return jdbcClient.sql(SAVE_TRANSLATION_QUERY).paramSource(translation).update();
+
+    return jdbcClient
+        .sql(SAVE_TRANSLATION_QUERY)
+        .param("id", translation.id())
+        .param("clientIp", translation.clientIp())
+        .param("timestamp", translation.timestamp())
+        .param("sourceLanguage", translation.sourceLanguage())
+        .param("targetLanguage", translation.targetLanguage())
+        .param("text", translation.text())
+        .param("translatedText", translation.translatedText())
+        .update();
   }
 }
