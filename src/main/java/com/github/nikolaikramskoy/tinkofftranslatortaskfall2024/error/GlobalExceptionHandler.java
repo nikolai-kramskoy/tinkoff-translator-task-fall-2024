@@ -44,6 +44,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorDtoResponse> handleYandexApiException(final YandexApiException e) {
     log.info("YandexApiException", e);
 
+    // https://yandex.cloud/ru/docs/translate/api-ref/errors-handling
     return ResponseEntity.status(e.getHttpStatusCode())
         .contentType(MediaType.APPLICATION_JSON)
         .body(new ErrorDtoResponse(Collections.singletonList(new ErrorDto(e.getMessage()))));

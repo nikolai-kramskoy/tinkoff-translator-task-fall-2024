@@ -1,0 +1,49 @@
+networks:
+  translator-app-network:
+
+services:
+  main-app:
+    container_name: translator-app
+    build:
+      context: ./
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      # I know about secrets, maybe in the future I will introduce it
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+      YANDEX_API_URL: ${YANDEX_API_URL}
+      YANDEX_API_KEY: ${YANDEX_API_KEY}
+    networks:
+      - translator-app-network
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -O - http://localhost:8080/actuator/health > /dev/null 2>&1"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+    depends_on:
+      translator-postgres:
+        condition: service_healthy
+
+  postgres:
+    container_name: translator-postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - translator-app-network
+    healthcheck:
+      test: [ "CMD", "pg_isready", "--dbname=${POSTGRES_DB}", "--username=${POSTGRES_USER}" ]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 3s
+
+    # maybe add volume
