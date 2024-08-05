@@ -1,7 +1,7 @@
 package com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.controller;
 
-import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.AvailableLanguageDto;
-import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.TranslationDto;
+import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.AvailableLanguageDto;
+import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.TranslateTextDtoResponse;
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.request.TranslateTextDtoRequest;
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.service.TranslationService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +29,7 @@ public class TranslationController {
       path = "/translate",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<TranslationDto> translateText(
+  public ResponseEntity<TranslateTextDtoResponse> translateText(
       @Valid @RequestBody final TranslateTextDtoRequest request,
       final HttpServletRequest httpServletRequest) {
     // in case of using some kind of reverse proxy or LB we need to check
@@ -39,7 +39,7 @@ public class TranslationController {
   }
 
   @GetMapping(path = "/available-languages", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<List<AvailableLanguageDto>> getAvailableLanguages() {
+  public ResponseEntity<AvailableLanguagesDtoResponse> getAvailableLanguages() {
     return ResponseEntity.ok(translationService.getAvailableLanguages());
   }
 }

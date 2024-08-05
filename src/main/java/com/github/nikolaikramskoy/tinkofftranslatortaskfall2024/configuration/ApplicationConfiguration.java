@@ -18,13 +18,17 @@ public class ApplicationConfiguration {
   }
 
   @Bean
-  public String yandexApiKey(@Value("${YANDEX_API_KEY}") final String yandexApiKey) {
-    return yandexApiKey;
+  public ExecutorService yandexTranslateApiExecutorService() {
+    return Executors.newFixedThreadPool(10);
   }
 
   @Bean
-  public ExecutorService translationExecutorService() {
-    // It would be interesting to solve this problem with virtual threads
-    return Executors.newFixedThreadPool(10);
+  public String yandexApiUrl(@Value("${YANDEX_API_URL}") final String yandexApiUrl) {
+    return yandexApiUrl;
+  }
+
+  @Bean
+  public String yandexApiKey(@Value("${YANDEX_API_KEY}") final String yandexApiKey) {
+    return yandexApiKey;
   }
 }
