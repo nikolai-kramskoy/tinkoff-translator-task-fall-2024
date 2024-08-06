@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestClientException;
 
 @RestControllerAdvice
 @Slf4j
@@ -78,6 +79,15 @@ public class GlobalExceptionHandler {
 
     // https://yandex.cloud/ru/docs/translate/api-ref/errors-handling
     return ResponseEntity.status(e.getHttpStatusCode())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(new ErrorDtoResponse(Collections.singletonList(new ErrorDto(e.getMessage()))));
+  }
+
+  @ExceptionHandler(RestClientException.class)
+  public ResponseEntity<ErrorDtoResponse> handleRestClientException(final RestClientException e) {
+    log.info("RestClientException", e);
+
+    return ResponseEntity.badRequest()
         .contentType(MediaType.APPLICATION_JSON)
         .body(new ErrorDtoResponse(Collections.singletonList(new ErrorDto(e.getMessage()))));
   }

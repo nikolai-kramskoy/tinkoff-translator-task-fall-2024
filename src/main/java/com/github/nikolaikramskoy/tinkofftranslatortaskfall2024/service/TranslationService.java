@@ -120,6 +120,8 @@ public class TranslationService {
    */
   public TranslateTextDtoResponse translateText(
       final TranslateTextDtoRequest request, final String clientIp) {
+    checkArgumentsTranslateText(request, clientIp);
+
     log.info(
         "translate text {} for client with IP {} using Yandex Translate API", request, clientIp);
 
@@ -156,6 +158,28 @@ public class TranslationService {
         });
 
     return new TranslateTextDtoResponse(translatedText);
+  }
+
+  private void checkArgumentsTranslateText(
+      final TranslateTextDtoRequest request, final String clientIp) {
+    if (request == null) {
+      throw new IllegalArgumentException("request == null");
+    }
+    if (request.text() == null || request.text().isEmpty()) {
+      throw new IllegalArgumentException("request.text() == null || request.text().isEmpty()");
+    }
+    if (request.sourceLanguage() == null || request.sourceLanguage().isEmpty()) {
+      throw new IllegalArgumentException(
+          "request.sourceLanguage() == null || request.sourceLanguage().isEmpty()");
+    }
+    if (request.targetLanguage() == null || request.targetLanguage().isEmpty()) {
+      throw new IllegalArgumentException(
+          "request.targetLanguage() == null || request.targetLanguage().isEmpty()");
+    }
+
+    if (clientIp == null) {
+      throw new IllegalArgumentException("clientIp == null");
+    }
   }
 
   private HttpHeaders createBasicHttpHeadersForYandexApi() {
