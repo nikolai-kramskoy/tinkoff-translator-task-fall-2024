@@ -128,6 +128,9 @@ public class TranslationService {
     final var translatedText = translateText(request);
     final var timestamp = LocalDateTime.now(clock);
 
+    // It's possible to save Translation asynchronously in worker (virtual)
+    // threads (I can return answer to client without information about
+    // insert in Repository) and return translatedText after submitting this task.
     transactionTemplate.executeWithoutResult(
         transactionStatus -> {
           var translation =

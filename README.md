@@ -2,7 +2,8 @@
 
 ## Usage
 
-This server is dependent only on single PostgreSQL instance.
+This server depends on a single PostgreSQL instance and Yandex Translate
+API.
 
 ### Launch
 
@@ -29,11 +30,16 @@ You need to set these several environment variables:
 - `POSTGRES_DB`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
+- `YANDEX_TRANSLATE_API_URL` - you can find API URL here
+[https://yandex.cloud/ru/docs/translate/api-ref/](https://yandex.cloud/ru/docs/translate/api-ref/).
+In testing i've used `https://translate.api.cloud.yandex.net/translate/v2`.
+- `YANDEX_API_KEY` - read about API key for Yandex here
+[https://yandex.cloud/ru/docs/iam/concepts/authorization/api-key](https://yandex.cloud/ru/docs/iam/concepts/authorization/api-key).
 
 You may optionally set these environment variables:
 - `JDK_JAVA_OPTIONS` - example: `JDK_JAVA_OPTIONS="-ea -Ddebug"`.
 - `CLI_ARGS` - example:
-  `CLI_ARGS="--logging.level.org.hibernate.SQL=DEBUG --logging.level.org.hibernate.stat=DEBUG"`.
+`CLI_ARGS="--logging.level.org.hibernate.SQL=DEBUG --logging.level.org.hibernate.stat=DEBUG"`.
 
 ### CLI arguments
 
