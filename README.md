@@ -44,3 +44,13 @@ in the queries and query statistics (by default they are not shown)):
 - `logging.level.org.hibernate.stat=DEBUG`
 - `logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE`
 - `spring.jpa.properties.hibernate.generate_statistics=true`
+
+## Possible improvements
+
+Now I have only unit tests for controllers and services. Ideally I'd also
+need to create unit tests for repositories and integration tests with
+Testcontainers (for PostgreSQL) and/or WireMock (for mocking Yandex API),
+and probably do testing with real Yandex API key.
+
+I've launched it with Docker without actual Yandex API key, and it seems
+to work correctly (I do understand that it isn't a significant achievement).

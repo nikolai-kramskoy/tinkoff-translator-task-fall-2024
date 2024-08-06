@@ -28,6 +28,13 @@ public class TranslationController {
 
   private final TranslationService translationService;
 
+  @GetMapping(path = "/available-languages", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Get languages available for translation")
+  @ApiResponse(responseCode = "200", description = "Successful query")
+  public ResponseEntity<AvailableLanguagesDtoResponse> getAvailableLanguages() {
+    return ResponseEntity.ok(translationService.getAvailableLanguages());
+  }
+
   @PostMapping(
       path = "/translate",
       consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -43,12 +50,5 @@ public class TranslationController {
     // special HTTP header for real client IP address
     return ResponseEntity.ok(
         translationService.translateText(request, httpServletRequest.getRemoteAddr()));
-  }
-
-  @GetMapping(path = "/available-languages", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "Get languages available for translation")
-  @ApiResponse(responseCode = "200", description = "Successful query")
-  public ResponseEntity<AvailableLanguagesDtoResponse> getAvailableLanguages() {
-    return ResponseEntity.ok(translationService.getAvailableLanguages());
   }
 }

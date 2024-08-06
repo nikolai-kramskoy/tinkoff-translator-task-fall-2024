@@ -50,19 +50,16 @@ class TranslationServiceTest {
   private static final ExecutorService YANDEX_TRANSLATE_API_TRANSLATE_EXECUTOR_SERVICE =
       Executors.newFixedThreadPool(10);
 
-  private RestTemplate restTemplate;
+  private RestTemplate restTemplateMock;
 
-  private TransactionTemplate transactionTemplate;
-
-  private TranslationRepository translationRepository;
+  private TransactionTemplate transactionTemplateMock;
 
   private TranslationService translationService;
 
   @BeforeEach
   public void initMocks() throws URISyntaxException {
-    restTemplate = mock(RestTemplate.class);
-    transactionTemplate = mock(TransactionTemplate.class);
-    translationRepository = mock(TranslationRepository.class);
+    restTemplateMock = mock(RestTemplate.class);
+    transactionTemplateMock = mock(TransactionTemplate.class);
 
     translationService =
         new TranslationService(
@@ -70,14 +67,14 @@ class TranslationServiceTest {
             YANDEX_TRANSLATE_API_TRANSLATE_EXECUTOR_SERVICE,
             YANDEX_TRANSLATE_API_URL,
             YANDEX_API_KEY,
-            restTemplate,
-            transactionTemplate,
-            translationRepository);
+            restTemplateMock,
+            transactionTemplateMock,
+            mock(TranslationRepository.class));
   }
 
   @Test
   void testGetAvailableLanguages_validRequest_returnDtoResponse() {
-    when(restTemplate.postForEntity(
+    when(restTemplateMock.postForEntity(
             eq(YANDEX_TRANSLATE_API_LIST_LANGUAGES_URI),
             // maybe it would be better to construct precise object, but it's
             // time-consuming
@@ -106,7 +103,7 @@ class TranslationServiceTest {
   void testGetAvailableLanguages_yandexApiError_throwYandexApiException() {
     final var errorMessage = "some 4xx error message";
 
-    when(restTemplate.postForEntity(
+    when(restTemplateMock.postForEntity(
             eq(YANDEX_TRANSLATE_API_LIST_LANGUAGES_URI),
             any(HttpEntity.class),
             eq(YandexTranslateListLanguagesResponse.class)))
@@ -125,10 +122,10 @@ class TranslationServiceTest {
 
   @Test
   void testTranslateText_validRequest_returnDtoResponse() {
-    when(restTemplate.postForEntity(
+    when(restTemplateMock.postForEntity(
             eq(YANDEX_TRANSLATE_API_TRANSLATE_URI),
             // This was tough to mock, order of execution of Callables inside
-            // ExecutorService is not fixed, so I can't just do consecutive thenReturn
+            // ExecutorService is arbitrary, so I can't just do consecutive thenReturn
             argThat(
                 httpEntity ->
                     ((HttpEntity<YandexTranslateTranslateDtoRequest>) httpEntity)
@@ -141,7 +138,7 @@ class TranslationServiceTest {
             ResponseEntity.ok(
                 new YandexTranslateTranslateDtoResponse(
                     Collections.singletonList(new YandexTranslateTranslationDto("hello")), null)));
-    when(restTemplate.postForEntity(
+    when(restTemplateMock.postForEntity(
             eq(YANDEX_TRANSLATE_API_TRANSLATE_URI),
             argThat(
                 httpEntity ->
@@ -157,7 +154,7 @@ class TranslationServiceTest {
                     Collections.singletonList(new YandexTranslateTranslationDto("everyone")),
                     null)));
 
-    doNothing().when(transactionTemplate).executeWithoutResult(any(Consumer.class));
+    doNothing().when(transactionTemplateMock).executeWithoutResult(any(Consumer.class));
 
     final var actual =
         translationService.translateText(
@@ -171,7 +168,7 @@ class TranslationServiceTest {
   void testTranslateText_validRequestAndYandexApiError_throwYandexApiException() {
     final var errorMessage = "some 5xx error message";
 
-    when(restTemplate.postForEntity(
+    when(restTemplateMock.postForEntity(
             eq(YANDEX_TRANSLATE_API_TRANSLATE_URI),
             any(HttpEntity.class),
             eq(YandexTranslateTranslateDtoResponse.class)))
