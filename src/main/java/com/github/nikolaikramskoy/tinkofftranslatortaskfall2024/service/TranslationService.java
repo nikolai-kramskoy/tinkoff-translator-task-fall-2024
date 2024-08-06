@@ -77,6 +77,12 @@ public class TranslationService {
     this.translationRepository = translationRepository;
   }
 
+  /**
+   * Fetches languages available for translation from Yandex Translate API.
+   *
+   * @return {@link AvailableLanguagesDtoResponse}
+   * @throws YandexApiException in case of 4xx or 5xx HTTP status codes from Yandex Translate API
+   */
   public AvailableLanguagesDtoResponse getAvailableLanguages() {
     log.debug("query Yandex Translate API for available languages");
 
@@ -101,6 +107,17 @@ public class TranslationService {
             .toList());
   }
 
+  /**
+   * Translates {@code text} in {@code sourceLanguage} to {@code targetLanguage} using data from
+   * {@code request} and saves information about translation in {@link TranslationRepository}.
+   *
+   * @param request must be not {@code null}; it's {@code text}, {@code sourceLanguage} and {@code
+   *     targetLanguage} must be not blank (null or size == 0); {@code sourceLanguage} and {@code
+   *     targetLanguage} must be available for translation in Yandex Translate API
+   * @param clientIp must be not {@code null}; must be a valid IP address
+   * @return {@link TranslateTextDtoResponse}
+   * @throws YandexApiException in case of 4xx or 5xx HTTP status codes from Yandex Translate API
+   */
   public TranslateTextDtoResponse translateText(
       final TranslateTextDtoRequest request, final String clientIp) {
     log.info(
