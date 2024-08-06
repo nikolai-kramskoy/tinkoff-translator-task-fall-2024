@@ -11,10 +11,10 @@ services:
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
-      # I know about secrets, maybe in the future I will introduce it
+      # I know about secrets, but for simplicity i will use simple env variable
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
-      YANDEX_API_URL: ${YANDEX_API_URL}
+      YANDEX_TRANSLATE_API_URL: ${YANDEX_TRANSLATE_API_URL}
       YANDEX_API_KEY: ${YANDEX_API_KEY}
     networks:
       - translator-app-network

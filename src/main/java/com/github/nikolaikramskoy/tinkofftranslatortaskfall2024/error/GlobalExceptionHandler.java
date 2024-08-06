@@ -52,12 +52,10 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorDtoResponse> handleException(final Exception e) {
-    final var message = e.getMessage();
-
-    log.info(message);
+    log.error("Exception", e);
 
     return ResponseEntity.internalServerError()
         .contentType(MediaType.APPLICATION_JSON)
-        .body(new ErrorDtoResponse(Collections.singletonList(new ErrorDto(message))));
+        .body(new ErrorDtoResponse(Collections.singletonList(new ErrorDto(e.getMessage()))));
   }
 }

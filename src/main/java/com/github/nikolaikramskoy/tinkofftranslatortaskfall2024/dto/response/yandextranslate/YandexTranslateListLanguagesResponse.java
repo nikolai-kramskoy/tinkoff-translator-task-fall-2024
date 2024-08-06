@@ -3,4 +3,5 @@ package com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.ya
 import java.util.List;
 
 // message is for possible error
-public record YandexListLanguagesResponse(List<YandexLanguageDto> languages, String message) {}
+public record YandexTranslateListLanguagesResponse(
+    List<YandexTranslateLanguageDto> languages, String message) {}

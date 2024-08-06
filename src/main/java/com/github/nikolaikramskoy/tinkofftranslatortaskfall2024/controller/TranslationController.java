@@ -4,6 +4,9 @@ import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.request.Tran
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.AvailableLanguagesDtoResponse;
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.TranslateTextDtoResponse;
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.service.TranslationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(path = "/v1")
+@Tag(name = "Translation API", description = "Translate text using Yandex Translate API")
 @Validated
 @RequiredArgsConstructor
 public class TranslationController {
@@ -28,6 +32,10 @@ public class TranslationController {
       path = "/translate",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(
+      summary = "Translate text",
+      description = "Translate text from source language to target language")
+  @ApiResponse(responseCode = "200", description = "Successful translation")
   public ResponseEntity<TranslateTextDtoResponse> translateText(
       @Valid @RequestBody final TranslateTextDtoRequest request,
       final HttpServletRequest httpServletRequest) {
@@ -38,6 +46,8 @@ public class TranslationController {
   }
 
   @GetMapping(path = "/available-languages", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Get languages available for translation")
+  @ApiResponse(responseCode = "200", description = "Successful query")
   public ResponseEntity<AvailableLanguagesDtoResponse> getAvailableLanguages() {
     return ResponseEntity.ok(translationService.getAvailableLanguages());
   }

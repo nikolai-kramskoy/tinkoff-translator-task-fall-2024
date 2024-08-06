@@ -14,13 +14,15 @@ public class TranslationRepository {
   private static final String SAVE_TRANSLATION_QUERY =
       "INSERT INTO translation (id, client_ip, \"timestamp\", source_language, "
           + "target_language, text, translated_text) VALUES (:id, :clientIp, "
-          + " :timestamp, :sourceLanguage, :targetLanguage, :text, :translatedText)";
+          + ":timestamp, :sourceLanguage, :targetLanguage, :text, :translatedText)";
 
-  private JdbcClient jdbcClient;
+  private final JdbcClient jdbcClient;
 
   public int saveTranslation(final Translation translation) {
     // this is an interesting solution
     // return jdbcClient.sql(SAVE_TRANSLATION_QUERY).paramSource(translation).update();
+
+    log.debug("Trying to insert Translation {} into DB", translation.id());
 
     return jdbcClient
         .sql(SAVE_TRANSLATION_QUERY)

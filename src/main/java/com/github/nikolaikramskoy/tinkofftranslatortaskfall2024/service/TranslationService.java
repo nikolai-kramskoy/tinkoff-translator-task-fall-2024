@@ -4,12 +4,12 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.EmptyDto;
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.request.TranslateTextDtoRequest;
-import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.request.yandextranslate.YandexTranslateDtoRequest;
+import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.request.yandextranslate.YandexTranslateTranslateDtoRequest;
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.AvailableLanguageDto;
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.AvailableLanguagesDtoResponse;
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.TranslateTextDtoResponse;
-import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.yandextranslate.YandexListLanguagesResponse;
-import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.yandextranslate.YandexTranslateDtoResponse;
+import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.yandextranslate.YandexTranslateListLanguagesResponse;
+import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.dto.response.yandextranslate.YandexTranslateTranslateDtoResponse;
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.error.ApplicationError;
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.error.ApplicationException;
 import com.github.nikolaikramskoy.tinkofftranslatortaskfall2024.error.YandexApiException;
@@ -45,10 +45,10 @@ public class TranslationService {
 
   private final Clock clock;
 
-  private final ExecutorService yandexTranslateApiExecutorService;
+  private final ExecutorService yandexTranslateApiTranslateExecutorService;
 
-  private final URI yandexApiListLanguagesUri;
-  private final URI yandexApiTranslateUri;
+  private final URI yandexTranslateApiListLanguagesUri;
+  private final URI yandexTranslateApiTranslateUri;
 
   private final String yandexApiAuthorizationHeaderValue;
 
@@ -60,17 +60,17 @@ public class TranslationService {
 
   public TranslationService(
       final Clock clock,
-      final ExecutorService yandexTranslateApiExecutorService,
-      final String yandexApiUrl,
+      final ExecutorService yandexTranslateApiTranslateExecutorService,
+      final String yandexTranslateApiUrl,
       final String yandexApiKey,
       final RestTemplate restTemplate,
       final TransactionTemplate transactionTemplate,
       final TranslationRepository translationRepository)
       throws URISyntaxException {
     this.clock = clock;
-    this.yandexTranslateApiExecutorService = yandexTranslateApiExecutorService;
-    this.yandexApiListLanguagesUri = new URI(yandexApiUrl + "/languages");
-    this.yandexApiTranslateUri = new URI(yandexApiUrl + "/translate");
+    this.yandexTranslateApiTranslateExecutorService = yandexTranslateApiTranslateExecutorService;
+    this.yandexTranslateApiListLanguagesUri = new URI(yandexTranslateApiUrl + "/languages");
+    this.yandexTranslateApiTranslateUri = new URI(yandexTranslateApiUrl + "/translate");
     this.yandexApiAuthorizationHeaderValue = "Api-Key " + yandexApiKey;
     this.restTemplate = restTemplate;
     this.transactionTemplate = transactionTemplate;
@@ -78,7 +78,7 @@ public class TranslationService {
   }
 
   public AvailableLanguagesDtoResponse getAvailableLanguages() {
-    log.debug("query Yandex API for available languages");
+    log.debug("query Yandex Translate API for available languages");
 
     // maybe it's better to cache this response from Yandex API
     // as available languages for translation don't change frequently
@@ -87,9 +87,9 @@ public class TranslationService {
     // https://yandex.cloud/ru/docs/translate/api-ref/Translation/listLanguages
     final var response =
         restTemplate.postForEntity(
-            yandexApiListLanguagesUri,
+            yandexTranslateApiListLanguagesUri,
             new HttpEntity<>(new EmptyDto(), createBasicHttpHeadersForYandexApi()),
-            YandexListLanguagesResponse.class);
+            YandexTranslateListLanguagesResponse.class);
 
     if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
       throw new YandexApiException(response.getStatusCode(), response.getBody().message());
@@ -103,7 +103,8 @@ public class TranslationService {
 
   public TranslateTextDtoResponse translateText(
       final TranslateTextDtoRequest request, final String clientIp) {
-    log.info("translate text {} for client with IP {}", request, clientIp);
+    log.info(
+        "translate text {} for client with IP {} using Yandex Translate API", request, clientIp);
 
     final var translatedText = translateText(request);
     final var timestamp = LocalDateTime.now(clock);
@@ -134,7 +135,7 @@ public class TranslationService {
                     translatedText);
           }
 
-          log.info("successful insertion of translation {} in the DB", translation.id());
+          log.info("successful insertion of Translation {} in the DB", translation.id());
         });
 
     return new TranslateTextDtoResponse(translatedText);
@@ -154,21 +155,22 @@ public class TranslationService {
   private String translateText(final TranslateTextDtoRequest request) {
     final var words = request.text().split("\s+");
     final var translationFutures =
-        new ArrayList<Future<ResponseEntity<YandexTranslateDtoResponse>>>(words.length);
+        new ArrayList<Future<ResponseEntity<YandexTranslateTranslateDtoResponse>>>(words.length);
 
     for (var i = 0; i < words.length; ++i) {
       translationFutures.add(
-          yandexTranslateApiExecutorService.submit(
-              createYandexTranslateCallableRequest(request, words[i])));
+          yandexTranslateApiTranslateExecutorService.submit(
+              createYandexTranslateTranslateCallableRequest(request, words[i])));
     }
 
     final var translatedText = new StringJoiner(" ");
 
     for (final var translationFuture : translationFutures) {
-      final ResponseEntity<YandexTranslateDtoResponse> response;
+      final ResponseEntity<YandexTranslateTranslateDtoResponse> response;
 
       try {
         // Probably setting some timeout value would be better
+        // (it's possible to introduce via an env variable)
         response = translationFuture.get();
       } catch (final InterruptedException e) {
         // maybe I should've try to wait more and then cancel the operations
@@ -179,7 +181,9 @@ public class TranslationService {
 
         throw new ApplicationException(ApplicationError.TIMEOUT);
       } catch (final ExecutionException e) {
-        throw new AssertionError("ExecutionException happened, but shouldn't");
+        cancelFutures(translationFutures);
+
+        throw new AssertionError("ExecutionException happened");
       }
 
       if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
@@ -188,31 +192,32 @@ public class TranslationService {
         throw new YandexApiException(response.getStatusCode(), response.getBody().message());
       }
 
-      // I submit only one word, so I will get only one translated word
+      // I submit exactly one word, so I will get exactly one translated word
       translatedText.add(response.getBody().translations().get(0).text());
     }
 
     return translatedText.toString();
   }
 
-  private Callable<ResponseEntity<YandexTranslateDtoResponse>> createYandexTranslateCallableRequest(
-      final TranslateTextDtoRequest request, final String word) {
+  private Callable<ResponseEntity<YandexTranslateTranslateDtoResponse>>
+      createYandexTranslateTranslateCallableRequest(
+          final TranslateTextDtoRequest request, final String word) {
     return () ->
         // https://yandex.cloud/ru/docs/translate/api-ref/Translation/translate
         restTemplate.postForEntity(
-            yandexApiTranslateUri,
+            yandexTranslateApiTranslateUri,
             new HttpEntity<>(
-                new YandexTranslateDtoRequest(
+                new YandexTranslateTranslateDtoRequest(
                     request.sourceLanguage(),
                     request.targetLanguage(),
                     Collections.singletonList(word)),
                 createBasicHttpHeadersForYandexApi()),
-            YandexTranslateDtoResponse.class);
+            YandexTranslateTranslateDtoResponse.class);
   }
 
-  // It's best to cancel pending futures if some of them failed
+  // It's best to cancel pending futures if any of them failed
   private void cancelFutures(
-      final List<Future<ResponseEntity<YandexTranslateDtoResponse>>> futures) {
+      final List<Future<ResponseEntity<YandexTranslateTranslateDtoResponse>>> futures) {
     futures.forEach(future -> future.cancel(true));
   }
 }
