@@ -170,7 +170,7 @@ public class TranslationService {
   }
 
   private String translateText(final TranslateTextDtoRequest request) {
-    final var words = request.text().split("\s+");
+    final var words = request.text().trim().split("\s+");
     final var translationFutures =
         new ArrayList<Future<ResponseEntity<YandexTranslateTranslateDtoResponse>>>(words.length);
 
